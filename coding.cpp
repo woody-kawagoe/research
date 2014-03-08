@@ -47,6 +47,8 @@ int main( int argc, char **argv ) {
 	IplImage *img22 = cvLoadImage( "input/2-2.jpg", CV_LOAD_IMAGE_ANYDEPTH | CV_LOAD_IMAGE_ANYCOLOR );
 	IplImage *img23 = cvLoadImage( "input/2-3.jpg", CV_LOAD_IMAGE_ANYDEPTH | CV_LOAD_IMAGE_ANYCOLOR );
 	IplImage *img24 = cvLoadImage( "input/2-4.jpg", CV_LOAD_IMAGE_ANYDEPTH | CV_LOAD_IMAGE_ANYCOLOR );
+	//補正したい映像
+	IplImage *showImage = cvLoadImage( "show.jpg", CV_LOAD_IMAGE_ANYDEPTH | CV_LOAD_IMAGE_ANYCOLOR );
 	//最大表示用
 	IplImage* full;
 	FILE *fout;
@@ -126,6 +128,11 @@ int main( int argc, char **argv ) {
 		return -1;
 	}
 	if ( img24 == NULL ) {
+		//	画像が見つからなかった場合
+		printf( "画像が見つかりません\n" );
+		return -1;
+	}
+	if ( showImage == NULL ) {
 		//	画像が見つからなかった場合
 		printf( "画像が見つかりません\n" );
 		return -1;
@@ -261,10 +268,12 @@ int main( int argc, char **argv ) {
 				s[1]=min/p[1]*REAL(showImage->imageData[showImage->widthStep * y + x * 3+1]);
 				s[2]=min/p[2]*REAL(showImage->imageData[showImage->widthStep * y + x * 3+2]);
 				//白補正
+				/*
 				s[0]=min/p[0]*255;
 				s[1]=min/p[1]*255;
 				s[2]=min/p[2]*255;
-				
+				*/
+
 				if(s[0]>255) printf("%d\n", s[0]);
 
 				colorImage->imageData[colorImage->widthStep * y + x * 3]=cvRound(s[0]);
@@ -298,18 +307,19 @@ int main( int argc, char **argv ) {
 	cvReleaseImage( &img24 );
 	cvReleaseImage( &sourceImage );
 	cvReleaseImage( &resultImage );
+	cvReleaseImage( &showImage );
 	cvReleaseImage( &codeImage );
 
     return 0;
 }
 
 IplImage binarization( IplImage *sourceImage){
-	IplImage *SgrayImage = cvCreateImage( cvGetSize(sourceImage), IPL_DEPTH_8U, 1 );
+	IplImage *grayImage = cvCreateImage( cvGetSize(sourceImage), IPL_DEPTH_8U, 1 );
 	IplImage *binaryImage = cvCreateImage( cvGetSize(sourceImage), IPL_DEPTH_8U, 1 );
 	//	BGRからグレースケールに変換する
-	cvCvtColor( sourceImage, SgrayImage, CV_BGR2GRAY );
+	cvCvtColor( sourceImage, grayImage, CV_BGR2GRAY );
 	//	グレースケールから2値に変換する
-	cvThreshold( SgrayImage, binaryImage, THRESHOLD_BIAS_VALUE, THRESHOLD_MAX_VALUE, CV_THRESH_BINARY );
+	cvThreshold( grayImage, binaryImage, THRESHOLD_BIAS_VALUE, THRESHOLD_MAX_VALUE, CV_THRESH_BINARY );
 
 	return *binaryImage;
 }
